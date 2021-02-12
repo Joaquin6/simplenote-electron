@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Component } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 import NotesIcon from '../icons/notes';
@@ -8,6 +8,7 @@ import TrashIcon from '../icons/trash';
 import actions from '../state/actions';
 
 import * as S from '../state';
+import * as T from '../types';
 
 const NoNotes = () => {
   const hasLoaded = useSelector((state: S.State) => state.ui.hasLoadedNotes);
@@ -28,29 +29,49 @@ const NoNotes = () => {
     );
   };
 
-  let message, icon, button;
+  type EmptyNoteListPlaceholder = {
+    message: String;
+    icon: JSX.Element | null;
+    button: JSX.Element | null;
+  };
 
-  switch (true) {
-    case searchQuery.length > 0:
-      message = 'No Results';
-      icon = null;
-      button = getSearchButton();
-      break;
-    case openedTag !== null:
-      message = `No notes tagged "${openedTag}"`;
-      icon = <TagIcon />;
-      button = '';
-      break;
-    case showTrash:
-      message = 'Your trash is empty';
-      icon = <TrashIcon />;
-      button = '';
-      break;
-    default:
-      message = 'Create your first note';
-      icon = <NotesIcon />;
-      button = '';
-  }
+  const placeholderInfo = ({
+    searchQuery,
+    openedTag,
+    showTrash,
+  }): EmptyNoteListPlaceholder => {
+    if (searchQuery.length > 0) {
+      return { message: 'No Results', icon: null, button: getSearchButton() };
+    }
+
+    if (openedTag !== null) {
+      return {
+        message: `No notes tagged "${openedTag}"`,
+        icon: <TagIcon />,
+        button: null,
+      };
+    }
+
+    if (showTrash) {
+      return {
+        message: 'Your trash is empty',
+        icon: <TrashIcon />,
+        button: null,
+      };
+    }
+
+    return {
+      message: 'Create your first note',
+      icon: <NotesIcon />,
+      button: null,
+    };
+  };
+
+  const { message, icon, button } = placeholderInfo({
+    searchQuery,
+    openedTag,
+    showTrash,
+  });
 
   return (
     <div className="note-list-placeholder theme-color-fg">
